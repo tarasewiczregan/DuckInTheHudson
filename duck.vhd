@@ -27,15 +27,15 @@ architecture duck_top of duck_top is
     type wall_data is array(0 to 31) of integer range 0 to 240;
 
     signal pixel_x, pixel_y: std_logic_vector(9 downto 0);
-    signal general_up: std_logic := '0'; -- walls will genrally move up the screen if true
-    signal cave_width: integer := 400;
+    signal general_up: std_logic := '0'; -- walls will generally move up the screen if true
+    signal river_width: integer := 400;
     signal general_width_up: std_logic := '0';
     signal video_on, pixel_tick: std_logic;
     signal red_reg, red_next: std_logic_vector(3 downto 0) := (others => '0');
     signal green_reg, green_next: std_logic_vector(3 downto 0) := (others => '0');
     signal blue_reg, blue_next: std_logic_vector(3 downto 0) := (others => '0'); 
-    signal x : integer := 115; --constant helicopter x position
-    signal y : integer := 150; --initial helicopter y position
+    signal x : integer := 115; --constant duck x position
+    signal y : integer := 150; --initial duck y position
     signal velocity_y : integer := 0;
     signal duck_top, duck_bottom, duck_left, duck_right : integer := 0; 
     signal update_pos, update_vel, update_walls : std_logic := '0'; 
@@ -61,7 +61,7 @@ vga_sync_unit: entity work.vga_sync
 font_unit: entity work.font_rom
   port map(data=>number_return_data, column_offset=>column_offset, number=>number, row_offset=>row_offset);
                        
-    duck_left <= x;--helicopter doesnt move in x direction, only up and down
+    duck_left <= x;--duck doesnt move in x direction, only up and down
     duck_right <= x + 23;            
     duck_top <= y;
     duck_bottom <= y + 16;
@@ -115,7 +115,7 @@ font_unit: entity work.font_rom
          end if;
     end process;
 
-    -- compute the helicopter's position
+    -- compute the duck's position
     process (playAgain, update_pos, video_on)
     begin
         if game_over_pause = '1' and playAgain = '1' then
@@ -123,7 +123,7 @@ font_unit: entity work.font_rom
         elsif game_over_pause = '1' and playAgain = '0' then
         elsif rising_edge(update_pos) then
             y <= y + velocity_y;
-            if (duck_bottom >= cave_width + walls(6)) then -- calculate collision with walls
+            if (duck_bottom >= river_width + walls(6)) then -- calculate collision with walls
                 y <= walls(7) + 50;
                 game_over_pause <= '1';
             elsif (duck_top <= walls(6))then
@@ -134,7 +134,7 @@ font_unit: entity work.font_rom
     end process;
     
 
-    -- compute the helicopter's velocity
+    -- compute the duck's velocity
     process (update_vel)
     begin
         if rising_edge(update_pos) then
@@ -154,16 +154,16 @@ font_unit: entity work.font_rom
     process (update_walls)
     begin
         if rising_edge(update_walls)  then
-            if (cave_width < 100) then--randomly change difficulty by changing cave_width
-                cave_width <= 105;
+            if (river_width < 100) then--randomly change difficulty by changing cave_width
+                river_width <= 105;
                 general_width_up <= '1';
-            elsif (cave_width > 300) then
-                cave_width <= 295;
+            elsif (river_width > 300) then
+                river_width <= 295;
                 general_width_up <= '0';
             elsif (general_width_up = '1') then 
-                cave_width <= cave_width + 1;
+                river_width <= river_width + 1;
             else
-                cave_width <= cave_width - 1;
+                river_width <= river_width - 1;
             end if;
             for i in 1 to 31 loop
                 walls(i - 1) <= walls(i);
@@ -219,9 +219,9 @@ font_unit: entity work.font_rom
         if (unsigned(pixel_x) >= duck_left) and (unsigned(pixel_x) < duck_right) and
         (unsigned(pixel_y) >= duck_top) and (unsigned(pixel_y) < (duck_bottom)) and
         (duck_data(pos_in_duck_y)(pos_in_duck_x) = '1') then
-            red_next <= "1111"; -- White helicopter
+            red_next <= "1111"; -- Yellow duck (I hope)
             green_next <= "1111";
-            blue_next <= "1111";
+            blue_next <= "0000";
         else    
             -- background color blue
             red_next <= "0000";
