@@ -74,18 +74,18 @@ font_unit: entity work.font_rom
         variable score_counter: integer := 0;
         variable game_over_counter: integer := 0;
     begin
-        if game_over_pause = '1' then
-            score <= 0;
+        if game_over_pause = '1' then -- game is over
+            score <= 0; --score reset to 0
         elsif (rising_edge(video_on) and freeze = '0') and game_over_pause = '0' then
             if start_pause = '0' then
-                counter := counter + 1;
+                counter := counter + 1; --incriment all the positions and score
                 vel_counter := vel_counter + 1;
                 wall_counter := wall_counter + 1;
                 score_counter := score_counter + 1;
                 
                 if counter > 1000 then --update postion every 2000 clocks
-                    counter := 0;
-                    update_pos <= '1';
+                    counter := 0; -- reset the counter
+                    update_pos <= '1'; --moves to new position
                 else
                     update_pos <= '0';
                 end if;
