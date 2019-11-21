@@ -1,4 +1,4 @@
--- Listing 12.1
+-- Adapted for Duck in th Hudson from:
 -- code from http://academic.csuohio.edu/chu_p/rtl/fpga_vhdl.html
 -- Modified by Kent Jones 11/14/2017 for Nexys4 DDR board
 library ieee;
