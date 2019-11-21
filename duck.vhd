@@ -1,7 +1,6 @@
---Main file for Helicopter game logic.
---Tom Dale,Davis Mariotti, Andrew Peacock
+--Duck in the Hudson based off of helicopter game built by Tom Dale,Davis Mariotti, Andrew Peacock
 --
---includes heli_top: calculates position of helicopter and walls, communicates with users button, vga_sync, and font_unit
+--includes: calculates position of duck and walls, communicates with users button, vga_sync, and font_unit
 --manages collisions, timer, reset, gameOver, and freeze
 
 library IEEE;
@@ -34,8 +33,8 @@ architecture duck_top of duck_top is
     signal red_reg, red_next: std_logic_vector(3 downto 0) := (others => '0');
     signal green_reg, green_next: std_logic_vector(3 downto 0) := (others => '0');
     signal blue_reg, blue_next: std_logic_vector(3 downto 0) := (others => '0'); 
-    signal x : integer := 115; --constant helicopter x position
-    signal y : integer := 150; --initial helicopter y position
+    signal x : integer := 115; --constant duck x position
+    signal y : integer := 150; --initial duck y position
     signal velocity_y : integer := 0;
     signal duck_top, duck_bottom, duck_left, duck_right : integer := 0; 
     signal update_pos, update_vel, update_walls : std_logic := '0'; 
@@ -61,7 +60,7 @@ vga_sync_unit: entity work.vga_sync
 font_unit: entity work.font_rom
   port map(data=>number_return_data, column_offset=>column_offset, number=>number, row_offset=>row_offset);
                        
-    duck_left <= x;--helicopter doesnt move in x direction, only up and down
+    duck_left <= x;--duck doesnt move in x direction, only up and down
     duck_right <= x + 23;            
     duck_top <= y;
     duck_bottom <= y + 16;
@@ -115,7 +114,7 @@ font_unit: entity work.font_rom
          end if;
     end process;
 
-    -- compute the helicopter's position
+    -- compute the duck's position
     process (playAgain, update_pos, video_on)
     begin
         if game_over_pause = '1' and playAgain = '1' then
@@ -134,7 +133,7 @@ font_unit: entity work.font_rom
     end process;
     
 
-    -- compute the helicopter's velocity
+    -- compute the duck's velocity
     process (update_vel)
     begin
         if rising_edge(update_pos) then
@@ -154,7 +153,7 @@ font_unit: entity work.font_rom
     process (update_walls)
     begin
         if rising_edge(update_walls)  then
-            if (wall_width < 100) then--randomly change difficulty by changing cave_width
+            if (wall_width < 100) then--randomly change difficulty by changing wall_width
                 wall_width <= 105;
                 general_width_up <= '1';
             elsif (wall_width > 300) then
