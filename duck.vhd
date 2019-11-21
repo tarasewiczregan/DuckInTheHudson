@@ -27,15 +27,15 @@ architecture duck_top of duck_top is
     type wall_data is array(0 to 31) of integer range 0 to 240;
 
     signal pixel_x, pixel_y: std_logic_vector(9 downto 0);
-    signal general_up: std_logic := '0'; -- walls will generally move up the screen if true
-    signal river_width: integer := 400;
+    signal general_up: std_logic := '0'; -- walls will genrally move up the screen if true
+    signal wall_width: integer := 400;
     signal general_width_up: std_logic := '0';
     signal video_on, pixel_tick: std_logic;
     signal red_reg, red_next: std_logic_vector(3 downto 0) := (others => '0');
     signal green_reg, green_next: std_logic_vector(3 downto 0) := (others => '0');
     signal blue_reg, blue_next: std_logic_vector(3 downto 0) := (others => '0'); 
-    signal x : integer := 115; --constant duck x position
-    signal y : integer := 150; --initial duck y position
+    signal x : integer := 115; --constant helicopter x position
+    signal y : integer := 150; --initial helicopter y position
     signal velocity_y : integer := 0;
     signal duck_top, duck_bottom, duck_left, duck_right : integer := 0; 
     signal update_pos, update_vel, update_walls : std_logic := '0'; 
@@ -61,7 +61,7 @@ vga_sync_unit: entity work.vga_sync
 font_unit: entity work.font_rom
   port map(data=>number_return_data, column_offset=>column_offset, number=>number, row_offset=>row_offset);
                        
-    duck_left <= x;--duck doesnt move in x direction, only up and down
+    duck_left <= x;--helicopter doesnt move in x direction, only up and down
     duck_right <= x + 23;            
     duck_top <= y;
     duck_bottom <= y + 16;
@@ -74,18 +74,18 @@ font_unit: entity work.font_rom
         variable score_counter: integer := 0;
         variable game_over_counter: integer := 0;
     begin
-        if game_over_pause = '1' then -- game is over
-            score <= 0; --score reset to 0
+        if game_over_pause = '1' then
+            score <= 0;
         elsif (rising_edge(video_on) and freeze = '0') and game_over_pause = '0' then
             if start_pause = '0' then
-                counter := counter + 1; --incriment all the positions and score
+                counter := counter + 1;
                 vel_counter := vel_counter + 1;
                 wall_counter := wall_counter + 1;
                 score_counter := score_counter + 1;
                 
                 if counter > 1000 then --update postion every 2000 clocks
-                    counter := 0; -- reset the counter
-                    update_pos <= '1'; --moves to new position
+                    counter := 0;
+                    update_pos <= '1';
                 else
                     update_pos <= '0';
                 end if;
@@ -115,7 +115,7 @@ font_unit: entity work.font_rom
          end if;
     end process;
 
-    -- compute the duck's position
+    -- compute the helicopter's position
     process (playAgain, update_pos, video_on)
     begin
         if game_over_pause = '1' and playAgain = '1' then
@@ -123,7 +123,7 @@ font_unit: entity work.font_rom
         elsif game_over_pause = '1' and playAgain = '0' then
         elsif rising_edge(update_pos) then
             y <= y + velocity_y;
-            if (duck_bottom >= river_width + walls(6)) then -- calculate collision with walls
+            if (duck_bottom >= wall_width + walls(6)) then -- calculate collision with walls
                 y <= walls(7) + 50;
                 game_over_pause <= '1';
             elsif (duck_top <= walls(6))then
@@ -134,7 +134,7 @@ font_unit: entity work.font_rom
     end process;
     
 
-    -- compute the duck's velocity
+    -- compute the helicopter's velocity
     process (update_vel)
     begin
         if rising_edge(update_pos) then
@@ -154,16 +154,16 @@ font_unit: entity work.font_rom
     process (update_walls)
     begin
         if rising_edge(update_walls)  then
-            if (river_width < 100) then--randomly change difficulty by changing cave_width
-                river_width <= 105;
+            if (wall_width < 100) then--randomly change difficulty by changing cave_width
+                wall_width <= 105;
                 general_width_up <= '1';
-            elsif (river_width > 300) then
-                river_width <= 295;
+            elsif (wall_width > 300) then
+                wall_width <= 295;
                 general_width_up <= '0';
             elsif (general_width_up = '1') then 
-                river_width <= river_width + 1;
+                wall_width <= wall_width + 1;
             else
-                river_width <= river_width - 1;
+                wall_width <= wall_width - 1;
             end if;
             for i in 1 to 31 loop
                 walls(i - 1) <= walls(i);
@@ -219,7 +219,7 @@ font_unit: entity work.font_rom
         if (unsigned(pixel_x) >= duck_left) and (unsigned(pixel_x) < duck_right) and
         (unsigned(pixel_y) >= duck_top) and (unsigned(pixel_y) < (duck_bottom)) and
         (duck_data(pos_in_duck_y)(pos_in_duck_x) = '1') then
-            red_next <= "1111"; -- Yellow duck (I hope)
+            red_next <= "1111"; -- yellow duck
             green_next <= "1111";
             blue_next <= "0000";
         else    
@@ -230,10 +230,10 @@ font_unit: entity work.font_rom
         end if;
         -- calculate where to draw walls
         for I in 0 to 31 loop
-            if ((unsigned(pixel_x) < 23*I)and (unsigned(pixel_x) >= 23*(I-1))) and ((unsigned(pixel_y) < walls(I) or (unsigned(pixel_y) > cave_width +  walls(I)))) then
-                red_next <= "1111";
-                green_next <= "0010";
-                blue_next <= "0010";
+            if ((unsigned(pixel_x) < 23*I)and (unsigned(pixel_x) >= 23*(I-1))) and ((unsigned(pixel_y) < walls(I) or (unsigned(pixel_y) > wall_width +  walls(I)))) then
+                red_next <= "0000";
+                green_next <= "1111";
+                blue_next <= "0000";
             end if;
         end loop;
         --draw scores to screen, must be separated by individual digits
